@@ -120,7 +120,7 @@ class Formbuilder
                 val = @model.get('field_values')[name] if @model.get('field_values')
                 $(x).attr("name", name)
                 @setFieldVal($(x), val) if val
-                field.setup($(x), @model, index)
+                field.setup($(x), @model, index) if field.setup
                 if @model.get(Formbuilder.options.mappings.REQUIRED)
                   $(x).attr("required", true)
                 index

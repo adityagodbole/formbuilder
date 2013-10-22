@@ -177,7 +177,9 @@
                   if (val) {
                     _this.setFieldVal($(x), val);
                   }
-                  field.setup($(x), _this.model, index);
+                  if (field.setup) {
+                    field.setup($(x), _this.model, index);
+                  }
                   if (_this.model.get(Formbuilder.options.mappings.REQUIRED)) {
                     $(x).attr("required", true);
                   }
