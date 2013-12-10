@@ -64,7 +64,7 @@
       BUTTON_CLASS: 'fb-button',
       HTTP_ENDPOINT: '',
       HTTP_METHOD: 'POST',
-      FIELDSTYPES_CUSTOM_VALIDATION: ['checkboxes', 'fullname'],
+      FIELDSTYPES_CUSTOM_VALIDATION: ['checkboxes', 'fullname', 'radio'],
       mappings: {
         SIZE: 'field_options.size',
         UNITS: 'field_options.units',
@@ -222,8 +222,14 @@
                 for (_i = 0, _len = _ref.length; _i < _len; _i++) {
                   x = _ref[_i];
                   _results.push(count = (function(x, index, name, val) {
+                    var value;
+                    if (_this.model.get('field_type') === 'radio') {
+                      value = x.value;
+                    }
                     name = cid.toString() + "_" + index.toString();
-                    if (_this.model.get('field_values')) {
+                    if ($(x).attr('type') === 'radio' && _this.model.get('field_values')) {
+                      val = _this.model.get('field_values')[value];
+                    } else if (_this.model.get('field_values')) {
                       val = _this.model.get('field_values')[name];
                     }
                     $(x).attr("name", name);
@@ -258,6 +264,11 @@
                 }
               },
               checkbox: function() {
+                if (val) {
+                  return $(elem).attr("checked", true);
+                }
+              },
+              radio: function() {
                 if (val) {
                   return $(elem).attr("checked", true);
                 }
@@ -763,7 +774,7 @@
 
 (function() {
   Formbuilder.registerField('address', {
-    view: "<div class='input-line'>\n  <span class='street'>\n    <input type='text' />\n    <label>Address</label>\n  </span>\n</div>\n\n<div class='input-line'>\n  <span class='city'>\n    <input type='text' />\n    <label>Suburb</label>\n  </span>\n\n  <span class='state'>\n    <input type='text' />\n    <label>State / Province / Region</label>\n  </span>\n</div>\n\n<div class='input-line'>\n  <span class='zip'>\n    <input type='text' />\n    <label>Zipcode</label>\n  </span>\n\n  <span class='country'>\n    <select><option>United States</option></select>\n    <label>Country</label>\n  </span>\n</div>",
+    view: "<div class='input-line'>\n  <span class='street'>\n    <input type='text' />\n    <label>Address</label>\n  </span>\n</div>\n\n<div class='input-line'>\n  <span class='city'>\n    <input type='text' />\n    <label>Suburb</label>\n  </span>\n\n  <span class='state'>\n    <input type='text' />\n    <label>State / Province / Region</label>\n  </span>\n</div>\n\n<div class='input-line'>\n  <span class='zip'>\n    <input type='number' />\n    <label>Zipcode</label>\n  </span>\n\n  <span class='country'>\n    <select><option>United States</option></select>\n    <label>Country</label>\n  </span>\n</div>",
     edit: "",
     addButton: "<span class=\"symbol\"><span class=\"icon-home\"></span></span> Address"
   });
@@ -795,6 +806,9 @@
             return true;
           }
           checked_chk_cnt = $el.find('input:checked').length;
+          if ($($el.find('input:checked').last()).val() === '__other__') {
+            return $el.find('input:text').val() !== '';
+          }
           return checked_chk_cnt > 0;
         })(model.get('required'), 0);
         return valid;
@@ -953,7 +967,7 @@
 
 (function() {
   Formbuilder.registerField('radio', {
-    view: "<% for (i in (rf.get(Formbuilder.options.mappings.OPTIONS) || [])) { %>\n  <div>\n    <label class='fb-option'>\n      <input type='radio' value=<%= rf.get(Formbuilder.options.mappings.OPTIONS)[i].label%> <%= rf.get(Formbuilder.options.mappings.OPTIONS)[i].checked && 'checked' %>/>\n      <%= rf.get(Formbuilder.options.mappings.OPTIONS)[i].label %>\n    </label>\n  </div>\n<% } %>\n\n<% if (rf.get(Formbuilder.options.mappings.INCLUDE_OTHER)) { %>\n  <div class='other-option'>\n    <label class='fb-option'>\n      <input type='radio' value=\"__other__\"/>\n      Other\n    </label>\n\n    <input type='text' />\n  </div>\n<% } %>",
+    view: "<% for (i in (rf.get(Formbuilder.options.mappings.OPTIONS) || [])) { %>\n  <div>\n    <label class='fb-option'>\n      <input type='radio' value=<%= rf.get(Formbuilder.options.mappings.OPTIONS)[i].label%> <%= rf.get(Formbuilder.options.mappings.OPTIONS)[i].checked && 'checked' %>/>\n      <%= rf.get(Formbuilder.options.mappings.OPTIONS)[i].label %>\n    </label>\n  </div>\n<% } %>\n\n<% if (rf.get(Formbuilder.options.mappings.INCLUDE_OTHER)) { %>\n  <div class='other-option'>\n    <label class='fb-option'>\n      <input class='other-option' type='radio' value=\"__other__\"/>\n      Other\n    </label>\n\n    <input type='text' />\n  </div>\n<% } %>",
     edit: "<%= Formbuilder.templates['edit/options']({ includeOther: true }) %>",
     addButton: "<span class=\"symbol\"><span class=\"icon-circle-blank\"></span></span> Multiple Choice",
     defaultAttributes: function(attrs) {
@@ -967,6 +981,22 @@
         }
       ];
       return attrs;
+    },
+    isValid: function($el, model) {
+      var _this = this;
+      return (function(valid) {
+        valid = (function(required_attr, checked_chk_cnt) {
+          if (!required_attr) {
+            return true;
+          }
+          checked_chk_cnt = $el.find('input:checked').length;
+          if ($el.find('input:checked').val() === '__other__') {
+            return $el.find('input:text').val() !== '';
+          }
+          return checked_chk_cnt > 0;
+        })(model.get('required'), 0);
+        return valid;
+      })(false);
     }
   });
 

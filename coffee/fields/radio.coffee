@@ -13,7 +13,7 @@ Formbuilder.registerField 'radio',
     <% if (rf.get(Formbuilder.options.mappings.INCLUDE_OTHER)) { %>
       <div class='other-option'>
         <label class='fb-option'>
-          <input type='radio' value="__other__"/>
+          <input class='other-option' type='radio' value="__other__"/>
           Other
         </label>
 
@@ -41,3 +41,13 @@ Formbuilder.registerField 'radio',
     ]
 
     attrs
+
+  isValid: ($el, model) ->
+    do(valid = false) =>
+      valid = do (required_attr = model.get('required'), checked_chk_cnt = 0) =>
+        return true if !required_attr
+        checked_chk_cnt = $el.find('input:checked').length
+        if $el.find('input:checked').val() == '__other__'
+          return $el.find('input:text').val() != ''
+        return checked_chk_cnt > 0
+      valid

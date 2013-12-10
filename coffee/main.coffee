@@ -16,7 +16,7 @@ class Formbuilder
     BUTTON_CLASS: 'fb-button'
     HTTP_ENDPOINT: ''
     HTTP_METHOD: 'POST'
-    FIELDSTYPES_CUSTOM_VALIDATION: ['checkboxes','fullname']
+    FIELDSTYPES_CUSTOM_VALIDATION: ['checkboxes','fullname','radio']
 
     mappings:
       SIZE: 'field_options.size'
@@ -151,8 +151,12 @@ class Formbuilder
                   name = null,
                   val = null
                 ) =>
+                  value = x.value if @model.get('field_type') == 'radio'
                   name = cid.toString() + "_" + index.toString()
-                  val = @model.get('field_values')[name] if @model.get('field_values')
+                  if $(x).attr('type') == 'radio' and @model.get('field_values')
+                    val = @model.get('field_values')[value]
+                  else if @model.get('field_values')
+                    val = @model.get('field_values')[name]
                   $(x).attr("name", name)
                   @setFieldVal($(x), val) if val
                   @field.setup($(x), @model, index) if @field.setup
@@ -170,6 +174,8 @@ class Formbuilder
                 val.split("/").pop().split("?")[0]
               ) if val
             checkbox: ->
+              $(elem).attr("checked", true) if val
+            radio: ->
               $(elem).attr("checked", true) if val
             default: ->
               $(elem).val(val) if val
