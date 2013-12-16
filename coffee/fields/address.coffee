@@ -2,32 +2,32 @@ Formbuilder.registerField 'address',
 
   view: """
     <div class='input-line'>
-      <span class='street'>
+      <span>
         <input type='text' />
         <label>Address</label>
       </span>
     </div>
 
     <div class='input-line'>
-      <span class='city'>
+      <span>
         <input type='text' />
         <label>Suburb</label>
       </span>
 
-      <span class='state'>
+      <span>
         <input type='text' />
         <label>State / Province / Region</label>
       </span>
     </div>
 
     <div class='input-line'>
-      <span class='zip'>
-        <input type='number' />
+      <span>
+        <input type='text' pattern="[a-zA-Z0-9]+"/>
         <label>Zipcode</label>
       </span>
 
-      <span class='country'>
-        <select><option>United States</option></select>
+      <span>
+        <select class='dropdown_country'><option>United States</option></select>
         <label>Country</label>
       </span>
     </div>

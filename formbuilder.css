@@ -17,9 +17,8 @@
 .fb-add-field-types a{display:inline-block;width:45%;background-color:#666;margin-bottom:5px}
 .fb-response-fields{padding-bottom:150px;}
 .fb-response-fields a.sortable-placeholder{display:block;border:1px dashed #ddd;min-height:80px;height:80px;width:100%}
-.fb-field-wrapper{cursor:pointer;position:relative;margin-bottom:20px;}
+.fb-field-wrapper{cursor:pointer;position:relative;}
 .fb-field-wrapper:hover .actions-wrapper,.fb-field-wrapper.editing .actions-wrapper{display:block}
-.fb-field-wrapper:hover .subtemplate-wrapper{border-color:#ddd}
 .fb-field-wrapper.editing{background-color:#dfefff;}
 .fb-field-wrapper.editing .subtemplate-wrapper{border-color:#c2d7ef;border-style:solid}
 .fb-field-wrapper .actions-wrapper{display:none;position:absolute;bottom:-7px;right:5px;z-index:3;}
@@ -27,7 +26,7 @@
 .fb-field-wrapper .actions-wrapper a.js-duplicate{background-color:#008000}
 .fb-field-wrapper .actions-wrapper a.js-clear{background-color:#f00}
 .fb-field-wrapper .active_link{bottom:0;position:absolute;z-index:3}
-.fb-field-wrapper .subtemplate-wrapper{border:1px dashed transparent;margin-bottom:10px;padding:10px;position:relative;}
+.fb-field-wrapper .subtemplate-wrapper{border:1px dashed transparent;padding:10px 10px 0 10px;position:relative;}
 .fb-field-wrapper .subtemplate-wrapper .cover{position:absolute;top:0;left:0;height:100%;width:100%;z-index:2}
 .fb-field-wrapper .subtemplate-wrapper > label{display:block;font-weight:bold;margin-bottom:5px}
 .fb-field-wrapper .subtemplate-wrapper abbr{color:#f00}
@@ -37,6 +36,7 @@
 .fb-field-wrapper .input-line > span input{width:100%}
 .fb-field-wrapper .input-line > span > label{display:block;font-size:13px;margin-left:3px}
 .fb-field-wrapper .help-block{display:block;font-size:12px;margin-top:5px}
+.dropdown_country{width:170%}
 .fb-edit-field-wrapper{font-size:13px;}
 .fb-edit-field-wrapper .fb-field-label{font-weight:bold;font-size:16px}
 .fb-edit-field-wrapper .fb-edit-section-header{font-weight:bold;border-bottom:1px solid #ccc;margin-top:15px;margin-bottom:5px;clear:both}
