@@ -1,0 +1,48 @@
+<div class='fb-edit-section-header'>Conditions</div>
+
+
+<div class='subtemplate-wrapper row-fluid' >
+  <div class='condition' data-rv-each-condition='model.conditions'>
+    <span class='fb-field-label fb-field-condition-label span1'> If </span>
+    <div class="span8">
+      <select data-rv-value='condition:source'>
+          <option value="">Select Field</option>
+        <% for( var i=0 ; i < opts.parentView.fieldViews.length ; i++){%>
+          <% if(opts.parentView.fieldViews[i].model.attributes.label == rf.attributes.label){ %>
+            <% break %>
+          <% } %>
+          <option value="<%= opts.parentView.fieldViews[i].model.getCid() %>"><%= opts.parentView.fieldViews[i].model.attributes.label %></option>
+        <%}%>
+      </select>
+    </div>
+    <span class='fb-field-label fb-field-condition-label span2'> field </span>
+    <div class="span6">
+      <select data-rv-value='condition:condition'>
+          <option value="">Select Comparator</option>
+          <option>Equals</option>
+          <option>Greater Than</option>
+          <option>Less Than</option>
+      </select>
+    </div>
+    <input class='span5 pull-right' data-rv-input='condition:value' type='text'/>
+    <span class='fb-field-label fb-field-condition-label span2'> then </span>
+    <div class="span3">
+      <select data-rv-value='condition:action'>
+          <option value="">Select Action</option>
+          <option>Show</option>
+          <option>Hide</option>
+      </select>
+    </div>
+    <div class="span8">
+      <select data-rv-value='condition:target'>
+        <option value="">Select Field</option>
+        <option value="<%= rf.getCid() %>" data-rv-text='model.<%= Formbuilder.options.mappings.LABEL %>'></option>
+      </select>
+    </div>
+    <a class="pull-right js-remove-condition <%= Formbuilder.options.BUTTON_CLASS %>" title="Remove Condition"><i class='icon-minus-sign'></i></a>
+  </div>
+</div>
+
+<div class='fb-bottom-add'>
+  <a class="js-add-condition <%= Formbuilder.options.BUTTON_CLASS %>">Add Condition</a>
+</div>

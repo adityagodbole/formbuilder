@@ -6,6 +6,7 @@ class Formbuilder
         field_type: field_type
         required: true
         field_options: {}
+        conditions: []
 
       Formbuilder.fields[field_type].defaultAttributes?(attrs) || attrs
 
@@ -41,6 +42,7 @@ class Formbuilder
       HINT: 'field_options.hint',
       PREV_BUTTON_TEXT: 'field_options.prev_button_text',
       NEXT_BUTTON_TEXT: 'field_options.next_button_text'
+      INCLUDE_CONDITIONS: 'field_options.include_conditions'
 
     dict:
       ALL_CHANGES_SAVED: 'All changes saved'
@@ -225,8 +227,11 @@ class Formbuilder
         @parentView.createAndShowEditView(@model) if !@options.live
 
       clear: ->
-        @parentView.handleFormUpdate()
-        @model.destroy()
+        do (index = 0, that = @) ->
+          that.parentView.handleFormUpdate()
+          index = that.parentView.fieldViews.indexOf(_.where(that.parentView.fieldViews, {cid: that.cid})[0]);
+          that.parentView.fieldViews.splice(index, 1) if (index > -1)
+          that.model.destroy()
 
       duplicate: ->
         attrs = _.clone(@model.attributes)
@@ -239,6 +244,8 @@ class Formbuilder
 
       events:
         'click .js-add-option': 'addOption'
+        'click .js-add-condition': 'addCondition'
+        'click .js-remove-condition': 'removeCondition'
         'click .js-remove-option': 'removeOption'
         'click .js-default-updated': 'defaultUpdated'
         'input .option-label-input': 'forceRender'
@@ -247,7 +254,7 @@ class Formbuilder
         @listenTo @model, "destroy", @remove
 
       render: ->
-        @$el.html(Formbuilder.templates["edit/base#{if !@model.is_input() then '_non_input' else ''}"]({rf: @model}))
+        @$el.html(Formbuilder.templates["edit/base#{if !@model.is_input() then '_non_input' else ''}"]({rf: @model, opts: @options}))
         rivets.bind @$el, { model: @model }
         return @
 
@@ -272,6 +279,21 @@ class Formbuilder
         @model.trigger "change:#{Formbuilder.options.mappings.OPTIONS}"
         @forceRender()
 
+      addCondition: (e) ->
+        $el = $(e.currentTarget)
+        i = @$el.find('.option').index($el.closest('.option'))
+        conditions = @model.get('conditions') || []
+        newCondition = { source: "", condition: "", value: "", action: "", target: "" }
+
+        if i > -1
+          conditions.splice(i + 1, 0, newCondition)
+        else
+          conditions.push newCondition
+
+        @model.set 'conditions', conditions
+        @model.trigger 'change:conditions'
+        @forceRender()
+
       removeOption: (e) ->
         $el = $(e.currentTarget)
         index = @$el.find(".js-remove-option").index($el)
@@ -279,6 +301,15 @@ class Formbuilder
         options.splice index, 1
         @model.set Formbuilder.options.mappings.OPTIONS, options
         @model.trigger "change:#{Formbuilder.options.mappings.OPTIONS}"
+        @forceRender()
+
+      removeCondition: (e) ->
+        $el = $(e.currentTarget)
+        index = @$el.find(".js-remove-option").index($el)
+        conditions = @model.get 'conditions'
+        conditions.splice index, 1
+        @model.set 'conditions', conditions
+        @model.trigger "change:conditions"
         @forceRender()
 
       defaultUpdated: (e) ->
@@ -304,6 +335,7 @@ class Formbuilder
         @$el = $(@options.selector)
         @formBuilder = @options.formBuilder
         @fieldViews = []
+        @formConditionsSaved = false
 
         # Create the collection, and bind the appropriate events
         @collection = new Formbuilder.collection
@@ -564,10 +596,24 @@ class Formbuilder
         @formSaved = true
         @saveFormButton.attr('disabled', true).text(Formbuilder.options.dict.ALL_CHANGES_SAVED)
         @collection.sort()
+        @collection.each @addConditions, @ unless @formConditionsSaved
+
         payload = JSON.stringify fields: @collection.toJSON()
 
         if Formbuilder.options.HTTP_ENDPOINT then @doAjaxSave(payload)
         @formBuilder.trigger 'save', payload
+
+      addConditions: (model) ->
+        @formConditionsSaved = true
+        unless _.isEmpty(model.attributes.conditions)
+          _.each(model.attributes.conditions, (condition) ->
+            do(source = {}) =>
+              unless _.isEmpty(condition.source)
+                source = model.collection.get(condition.source)
+                if source
+                  source.attributes.conditions.push(condition)
+                  source.save()
+          )
 
       formData: ->
         @$('#formbuilder_form').serializeArray()

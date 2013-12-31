@@ -40,10 +40,11 @@
 .dropdown_country{width:170%}
 .fb-edit-field-wrapper{font-size:13px;}
 .fb-edit-field-wrapper .fb-field-label{font-weight:bold;font-size:16px}
+.fb-edit-field-wrapper .fb-field-condition-label{padding-top:2%;padding-left:3%;margin-left:0%}
 .fb-edit-field-wrapper .fb-edit-section-header{font-weight:bold;border-bottom:1px solid #ccc;margin-top:15px;margin-bottom:5px;clear:both}
-.fb-edit-field-wrapper .js-add-option,.fb-edit-field-wrapper .js-remove-option{padding:3px 6px}
-.fb-edit-field-wrapper .js-add-option{background-color:#008000}
-.fb-edit-field-wrapper .js-remove-option{background-color:#f00}
+.fb-edit-field-wrapper .js-add-option,.fb-edit-field-wrapper .js-remove-option,.fb-edit-field-wrapper .js-add-condition,.fb-edit-field-wrapper .js-remove-condition{padding:3px 6px}
+.fb-edit-field-wrapper .js-add-option,.fb-edit-field-wrapper .js-add-condition{background-color:#008000}
+.fb-edit-field-wrapper .js-remove-option,.fb-edit-field-wrapper .js-remove-condition{background-color:#f00}
 .fb-edit-field-wrapper .fb-bottom-add{margin-top:8px}
 .fb-edit-field-wrapper .fb-field-label-length-unit{display:inline-block}
 .fb-common-wrapper .fb-label-description{float:left;width:180px;}
