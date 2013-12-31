@@ -608,10 +608,10 @@ class Formbuilder
           _.each(model.attributes.conditions, (condition) ->
             do(source = {}) =>
               unless _.isEmpty(condition.source)
-                source = model.collection.get(condition.source)
-                if source
-                  source.attributes.conditions.push(condition)
-                  source.save()
+                source = model.collection.where({cid: condition.source})
+                if source[0]
+                  source[0].attributes.conditions.push(condition)
+                  source[0].save()
           )
 
       formData: ->

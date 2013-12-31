@@ -777,10 +777,12 @@
               var _this = this;
               return (function(source) {
                 if (!_.isEmpty(condition.source)) {
-                  source = model.collection.get(condition.source);
-                  if (source) {
-                    source.attributes.conditions.push(condition);
-                    return source.save();
+                  source = model.collection.where({
+                    cid: condition.source
+                  });
+                  if (source[0]) {
+                    source[0].attributes.conditions.push(condition);
+                    return source[0].save();
                   }
                 }
               })({});
@@ -1272,7 +1274,7 @@ __p += '\n          <option value="' +
 ((__t = ( opts.parentView.fieldViews[i].model.attributes.label )) == null ? '' : __t) +
 '</option>\n        ';
 };
-__p += '\n      </select>\n    </div>\n    <span class=\'fb-field-label fb-field-condition-label span2\'> field </span>\n    <div class="span6">\n      <select data-rv-value=\'condition:condition\'>\n          <option value="">Select Comparator</option>\n          <option>equals</option>\n          <option>less than</option>\n          <option>greater than</option>\n          <option>is not empty</option>\n      </select>\n    </div>\n    <input class=\'span5 pull-right\' data-rv-input=\'condition:value\' type=\'text\'/>\n    <span class=\'fb-field-label fb-field-condition-label span2\'> then </span>\n    <div class="span3">\n      <select data-rv-value=\'condition:action\'>\n          <option value="">Select Action</option>\n          <option>show</option>\n          <option>hide</option>\n      </select>\n    </div>\n    <div class="span8">\n      <select data-rv-value=\'condition:target\'>\n        <option value="">Select Field</option>\n        <option value="' +
+__p += '\n      </select>\n    </div>\n    <span class=\'fb-field-label fb-field-condition-label span2\'> field </span>\n    <div class="span6">\n      <select data-rv-value=\'condition:condition\'>\n          <option value="">Select Comparator</option>\n          <option>equals</option>\n          <option>greater than</option>\n          <option>less than</option>\n          <option>is not empty</option>\n      </select>\n    </div>\n    <input class=\'span5 pull-right\' data-rv-input=\'condition:value\' type=\'text\'/>\n    <span class=\'fb-field-label fb-field-condition-label span2\'> then </span>\n    <div class="span3">\n      <select data-rv-value=\'condition:action\'>\n          <option value="">Select Action</option>\n          <option>show</option>\n          <option>hide</option>\n      </select>\n    </div>\n    <div class="span8">\n      <select data-rv-value=\'condition:target\'>\n        <option value="">Select Field</option>\n        <option value="' +
 ((__t = ( rf.getCid() )) == null ? '' : __t) +
 '" data-rv-text=\'model.' +
 ((__t = ( Formbuilder.options.mappings.LABEL )) == null ? '' : __t) +
