@@ -101,33 +101,70 @@ class Formbuilder
         'click .js-duplicate': 'duplicate'
         'click .js-clear': 'clear'
         'keyup .subtemplate-wrapper': 'getTextInput'
+        'change .subtemplate-wrapper': 'getTextInput'
       
-      getTextInput: (ev)->
-        do(set_field = {},clicked_element = [],
-                        target_model = {},elem_val = {},condition = "equals") =>
-          set_field = @model.get('conditions')[0]
-          if set_field.source is @model.getCid()
-            clicked_element = $(ev.currentTarget)
-            target_model = @model.collection.
-                            where({cid: set_field.target})
-            elem_val = clicked_element.
-                        find("[name = "+@model.getCid()+"_1]").val()
-            if set_field.condition is "equals"
-              condition = '=='
-            else if set_field.condition is "less than"
-              condition = '<'
-            else if set_field.condition is "greater than"
-              condition = '>'
-            else
-              condition = "!="  
-              
-            if  eval("'#{elem_val}' #{condition} '#{set_field.value}'")
-              $("."+target_model[0].
-                get('cid')).addClass('show')
-            else
-              $("."+target_model[0].
-                get('cid')).removeClass('show')
-            
+      check_date: (firstValue, secondValue, condition) ->
+        do(firstDate = "",secondDate = ""
+          , firstValue = "", secondValue = "") ->
+            if(firstValue != "")
+              firstValue = firstValue.split('/')
+              secondValue = secondValue.split('/')
+              firstDate = new Date()
+              firstDate.setFullYear(firstValue[0],
+               firstValue[1] - 1, firstValue[2])
+              secondDate = new Date()
+              secondDate.setFullYear(secondValue[0],
+                secondValue[1] - 1, secondValue[2])
+              if (condition == "<")
+                if(firstDate < secondDate)
+                  true
+                else
+                  false
+              else if(condition == ">")
+                if(firstDate > secondDate)
+                  true
+                else
+                  false
+              else
+                false
+        return @        
+
+
+      getTextInput: (ev) ->
+        do(
+          set_field = {},clicked_element = [],
+          target_model = {},elem_val = {},condition = "equals", 
+          isDate = true , check_result = false) ->
+            set_field = @model.get('conditions')[0]
+            if set_field.source is @model.getCid()
+              clicked_element = $(ev.currentTarget)
+              target_model = @model.collection.
+                              where({cid: set_field.target})
+              target_model = target_model[0]
+              isDate = true if @model.get('field_type') is 'date'
+              elem_val = clicked_element.
+                          find("[name = "+@model.getCid()+"_1]").val()
+              if set_field.condition is "equals"
+                condition = '=='
+              else if set_field.condition is "less than"
+                condition = '<'
+              else if set_field.condition is "greater than"
+                condition = '>'
+              else
+                condition = "!="
+              if isDate
+                if(check_result =
+                  @check_date(elem_val, set_field.value, condition))
+                  $("." + target_model.get('cid')).addClass('show')
+                else 
+                  $("." + target_model.get('cid')).removeClass('show')
+              else if  eval("'#{elem_val}' #{condition} '#{set_field.value}'")
+                $("."+target_model.
+                  get('cid')).addClass('show')
+              else
+                $("."+target_model.
+                  get('cid')).removeClass('show')
+        return @          
 
       initialize: ->
         @parentView = @options.parentView
@@ -165,16 +202,17 @@ class Formbuilder
           cid = @model.getCid(),
           base_templ_suff = if @model.is_input() then '' else '_non_input',
         ) =>
-          set_field = @model.get('conditions')[0]
-          action = set_field.action
-          set_field = true if @model.getCid() is set_field.target
+          if @model.get('conditions').length > 0
+            set_field = @model.get('conditions')[0]
+            action = set_field.action
+            set_field = true if @model.getCid() is set_field.target
+            @$el.addClass("hide") if set_field is true and action is 'show'
           if !@is_section_break
             @$el.addClass('response-field-'+ @field_type + ' '+ @model.getCid())
               .data('cid', cid)
               .html(Formbuilder.templates["view/base#{base_templ_suff}"]({
                 rf: @model,
                 opts: @options}))
-            @$el.addClass("hide") if set_field is true and action is 'show'
             do ( # compute and add names and values to fields
               x = null,
               count = 0,
