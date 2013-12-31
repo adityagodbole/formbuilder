@@ -114,10 +114,12 @@ class Formbuilder
                         find("[name = "+@model.getCid()+"_1]").val()
             if set_field.condition is "equals"
               condition = '=='
-            else if set_field.condition is "<"
+            else if set_field.condition is "less than"
               condition = '<'
-            else
+            else if set_field.condition is "greater than"
               condition = '>'
+            else
+              condition = "!="  
               
             if  eval("'#{elem_val}' #{condition} '#{set_field.value}'")
               $("."+target_model[0].
@@ -147,15 +149,12 @@ class Formbuilder
 
       builder_render: ->
         do (cid = @model.getCid(), that = @) ->
-          that.$el.addClass('response-field-'+that.model
-            .get(Formbuilder.options.mappings.FIELD_TYPE)).data('cid', cid)
-              .html(Formbuilder
-                .templates["view/base#{if !that.model.is_input() then '_non_input' else ''}"]
-                ({rf: that.model, opts: that.options}))
+          that.$el.addClass('response-field-'+that.model.get(Formbuilder.options.mappings.FIELD_TYPE))
+            .data('cid', cid)
+            .html(Formbuilder.templates["view/base#{if !that.model.is_input() then '_non_input' else ''}"]({rf: that.model, opts: that.options}))
           do (x = null, count = 0) ->
             for x in that.$("input, textarea, select")
-              count = count + 1 if do(attr = $(x).attr('type')) ->
-              attr != 'radio' && attr != 'checkbox'
+              count = count + 1 if do(attr = $(x).attr('type')) -> attr != 'radio' && attr != 'checkbox'
               $(x).attr("name", cid.toString() + "_" + count.toString())
         return @
 

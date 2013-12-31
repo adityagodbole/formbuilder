@@ -177,10 +177,12 @@
               elem_val = clicked_element.find("[name = " + _this.model.getCid() + "_1]").val();
               if (set_field.condition === "equals") {
                 condition = '==';
-              } else if (set_field.condition === "<") {
+              } else if (set_field.condition === "less than") {
                 condition = '<';
-              } else {
+              } else if (set_field.condition === "greater than") {
                 condition = '>';
+              } else {
+                condition = "!=";
               }
               if (eval("'" + elem_val + "' " + condition + " '" + set_field.value + "'")) {
                 return $("." + target_model[0].get('cid')).addClass('show');
@@ -213,20 +215,21 @@
         },
         builder_render: function() {
           (function(cid, that) {
-            that.$el.addClass('response-field-' + that.model.get(Formbuilder.options.mappings.FIELD_TYPE)).data('cid', cid).html(Formbuilder.templates["view/base" + (!that.model.is_input() ? '_non_input' : '')], {
+            that.$el.addClass('response-field-' + that.model.get(Formbuilder.options.mappings.FIELD_TYPE)).data('cid', cid).html(Formbuilder.templates["view/base" + (!that.model.is_input() ? '_non_input' : '')]({
               rf: that.model,
               opts: that.options
-            });
+            }));
             return (function(x, count) {
               var _i, _len, _ref, _results;
               _ref = that.$("input, textarea, select");
               _results = [];
               for (_i = 0, _len = _ref.length; _i < _len; _i++) {
                 x = _ref[_i];
-                if ((function(attr) {})($(x).attr('type'))) {
+                if ((function(attr) {
+                  return attr !== 'radio' && attr !== 'checkbox';
+                })($(x).attr('type'))) {
                   count = count + 1;
                 }
-                attr !== 'radio' && attr !== 'checkbox';
                 _results.push($(x).attr("name", cid.toString() + "_" + count.toString()));
               }
               return _results;
@@ -1269,11 +1272,11 @@ __p += '\n          <option value="' +
 ((__t = ( opts.parentView.fieldViews[i].model.attributes.label )) == null ? '' : __t) +
 '</option>\n        ';
 };
-__p += '\n      </select>\n    </div>\n    <span class=\'fb-field-label fb-field-condition-label span2\'> field </span>\n    <div class="span6">\n      <select data-rv-value=\'condition:condition\'>\n          <option value="">Select Comparator</option>\n          <option>Equals</option>\n          <option>Greater Than</option>\n          <option>Less Than</option>\n      </select>\n    </div>\n    <input class=\'span5 pull-right\' data-rv-input=\'condition:value\' type=\'text\'/>\n    <span class=\'fb-field-label fb-field-condition-label span2\'> then </span>\n    <div class="span3">\n      <select data-rv-value=\'condition:action\'>\n          <option value="">Select Action</option>\n          <option>Show</option>\n          <option>Hide</option>\n      </select>\n    </div>\n    <div class="span8">\n      <select data-rv-value=\'condition:target\'>\n        <option value="">Select Field</option>\n        <option value="' +
+__p += '\n      </select>\n    </div>\n    <span class=\'fb-field-label fb-field-condition-label span2\'> field </span>\n    <div class="span6">\n      <select data-rv-value=\'condition:condition\'>\n          <option value="">Select Comparator</option>\n          <option>equals</option>\n          <option>less than</option>\n          <option>greater than</option>\n          <option>is not empty</option>\n      </select>\n    </div>\n    <input class=\'span5 pull-right\' data-rv-input=\'condition:value\' type=\'text\'/>\n    <span class=\'fb-field-label fb-field-condition-label span2\'> then </span>\n    <div class="span3">\n      <select data-rv-value=\'condition:action\'>\n          <option value="">Select Action</option>\n          <option>show</option>\n          <option>hide</option>\n      </select>\n    </div>\n    <div class="span8">\n      <select data-rv-value=\'condition:target\'>\n        <option value="">Select Field</option>\n        <option value="' +
 ((__t = ( rf.getCid() )) == null ? '' : __t) +
 '" data-rv-text=\'model.' +
 ((__t = ( Formbuilder.options.mappings.LABEL )) == null ? '' : __t) +
-'\'></option>\n      </select>\n    </div>\n\n    <a class="pull-right js-remove-condition ' +
+'\'></option>\n      </select>\n    </div>\n    <a class="pull-right js-remove-condition ' +
 ((__t = ( Formbuilder.options.BUTTON_CLASS )) == null ? '' : __t) +
 '" title="Remove Condition"><i class=\'icon-minus-sign\'></i></a>\n  </div>\n</div>\n\n<div class=\'fb-bottom-add\'>\n  <a class="js-add-condition ' +
 ((__t = ( Formbuilder.options.BUTTON_CLASS )) == null ? '' : __t) +
