@@ -160,7 +160,33 @@
         events: {
           'click .subtemplate-wrapper': 'focusEditView',
           'click .js-duplicate': 'duplicate',
-          'click .js-clear': 'clear'
+          'click .js-clear': 'clear',
+          'keyup .subtemplate-wrapper': 'getTextInput'
+        },
+        getTextInput: function(ev) {
+          var _this = this;
+          return (function(set_field, clicked_element, target_model, elem_val, condition) {
+            set_field = _this.model.get('conditions')[0];
+            if (set_field.source === _this.model.getCid()) {
+              clicked_element = $(ev.currentTarget);
+              target_model = _this.model.collection.where({
+                cid: set_field.target
+              });
+              elem_val = clicked_element.find("[name = " + _this.model.getCid() + "_1]").val();
+              if (set_field.condition === "equals") {
+                condition = '==';
+              } else if (set_field.condition === "<") {
+                condition = '<';
+              } else {
+                condition = '>';
+              }
+              if (eval("'" + elem_val + "' " + condition + " '" + set_field.value + "'")) {
+                return $("." + target_model[0].get('cid')).addClass('show');
+              } else {
+                return $("." + target_model[0].get('cid')).removeClass('show');
+              }
+            }
+          })({}, [], {}, {}, "equals");
         },
         initialize: function() {
           this.parentView = this.options.parentView;
@@ -185,21 +211,20 @@
         },
         builder_render: function() {
           (function(cid, that) {
-            that.$el.addClass('response-field-' + that.model.get(Formbuilder.options.mappings.FIELD_TYPE)).data('cid', cid).html(Formbuilder.templates["view/base" + (!that.model.is_input() ? '_non_input' : '')]({
+            that.$el.addClass('response-field-' + that.model.get(Formbuilder.options.mappings.FIELD_TYPE)).data('cid', cid).html(Formbuilder.templates["view/base" + (!that.model.is_input() ? '_non_input' : '')], {
               rf: that.model,
               opts: that.options
-            }));
+            });
             return (function(x, count) {
               var _i, _len, _ref, _results;
               _ref = that.$("input, textarea, select");
               _results = [];
               for (_i = 0, _len = _ref.length; _i < _len; _i++) {
                 x = _ref[_i];
-                if ((function(attr) {
-                  return attr !== 'radio' && attr !== 'checkbox';
-                })($(x).attr('type'))) {
+                if ((function(attr) {})($(x).attr('type'))) {
                   count = count + 1;
                 }
+                attr !== 'radio' && attr !== 'checkbox';
                 _results.push($(x).attr("name", cid.toString() + "_" + count.toString()));
               }
               return _results;
@@ -209,20 +234,27 @@
         },
         live_render: function() {
           var _this = this;
-          (function(cid, base_templ_suff) {
+          (function(set_field, action, cid, base_templ_suff) {
+            set_field = _this.model.get('conditions')[0];
+            action = set_field.action;
+            if (_this.model.getCid() === set_field.target) {
+              set_field = true;
+            }
             if (!_this.is_section_break) {
-              _this.$el.addClass('response-field-' + _this.field_type).data('cid', cid).html(Formbuilder.templates["view/base" + base_templ_suff]({
+              _this.$el.addClass('response-field-' + _this.field_type + ' ' + _this.model.getCid()).data('cid', cid).html(Formbuilder.templates["view/base" + base_templ_suff]({
                 rf: _this.model,
                 opts: _this.options
               }));
+              if (set_field === true && action === 'show') {
+                _this.$el.addClass("hide");
+              }
               return (function(x, count, should_incr) {
                 var _i, _len, _ref, _results;
                 _ref = _this.$("input, textarea, select");
                 _results = [];
                 for (_i = 0, _len = _ref.length; _i < _len; _i++) {
                   x = _ref[_i];
-                  _results.push(count = (function(x, index, name, val) {
-                    var value;
+                  _results.push(count = (function(x, index, name, val, value) {
                     if (_this.model.get('field_type') === 'radio') {
                       value = x.value;
                     }
@@ -239,18 +271,18 @@
                     if (_this.field.setup) {
                       _this.field.setup($(x), _this.model, index);
                     }
-                    if (_this.model.get(Formbuilder.options.mappings.REQUIRED) && $.inArray(_this.model.get('field_type'), Formbuilder.options.FIELDSTYPES_CUSTOM_VALIDATION) === -1) {
+                    if (_this.model.get(Formbuilder.options.mappings.REQUIRED) && $.inArray(_this.model.get('field_type'), Formbuilder.options.FIELDSTYPES_CUSTOM_VALIDATION) === -1 && set_field !== true) {
                       $(x).attr("required", true);
                     }
                     return index;
-                  })(x, count + (should_incr($(x).attr('type')) ? 1 : 0), null, null));
+                  })(x, count + (should_incr($(x).attr('type')) ? 1 : 0), null, null, 0));
                 }
                 return _results;
               })(null, 0, function(attr) {
                 return attr !== 'radio';
               });
             }
-          })(this.model.getCid(), this.model.is_input() ? '' : '_non_input');
+          })({}, "show", this.model.getCid(), this.model.is_input() ? '' : '_non_input');
           return this;
         },
         setFieldVal: function(elem, val) {

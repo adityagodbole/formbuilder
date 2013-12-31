@@ -98,6 +98,32 @@ class Formbuilder
         'click .subtemplate-wrapper': 'focusEditView'
         'click .js-duplicate': 'duplicate'
         'click .js-clear': 'clear'
+        'keyup .subtemplate-wrapper': 'getTextInput'
+      
+      getTextInput: (ev)->
+        do(set_field = {},clicked_element = [],
+                        target_model = {},elem_val = {},condition = "equals") =>
+          set_field = @model.get('conditions')[0]
+          if set_field.source is @model.getCid()
+            clicked_element = $(ev.currentTarget)
+            target_model = @model.collection.
+                            where({cid: set_field.target})
+            elem_val = clicked_element.
+                        find("[name = "+@model.getCid()+"_1]").val()
+            if set_field.condition is "equals"
+              condition = '=='
+            else if set_field.condition is "<"
+              condition = '<'
+            else
+              condition = '>'
+              
+            if  eval("'#{elem_val}' #{condition} '#{set_field.value}'")
+              $("."+target_model[0].
+                get('cid')).addClass('show')
+            else
+              $("."+target_model[0].
+                get('cid')).removeClass('show')
+            
 
       initialize: ->
         @parentView = @options.parentView
@@ -119,26 +145,35 @@ class Formbuilder
 
       builder_render: ->
         do (cid = @model.getCid(), that = @) ->
-          that.$el.addClass('response-field-'+that.model.get(Formbuilder.options.mappings.FIELD_TYPE))
-            .data('cid', cid)
-            .html(Formbuilder.templates["view/base#{if !that.model.is_input() then '_non_input' else ''}"]({rf: that.model, opts: that.options}))
+          that.$el.addClass('response-field-'+that.model
+            .get(Formbuilder.options.mappings.FIELD_TYPE)).data('cid', cid)
+              .html(Formbuilder
+                .templates["view/base#{if !that.model.is_input() then '_non_input' else ''}"]
+                ({rf: that.model, opts: that.options}))
           do (x = null, count = 0) ->
             for x in that.$("input, textarea, select")
-              count = count + 1 if do(attr = $(x).attr('type')) -> attr != 'radio' && attr != 'checkbox'
+              count = count + 1 if do(attr = $(x).attr('type')) ->
+              attr != 'radio' && attr != 'checkbox'
               $(x).attr("name", cid.toString() + "_" + count.toString())
         return @
 
       live_render: ->
         do (
+          set_field = {}
+          action = "show"
           cid = @model.getCid(),
           base_templ_suff = if @model.is_input() then '' else '_non_input',
         ) =>
+          set_field = @model.get('conditions')[0]
+          action = set_field.action
+          set_field = true if @model.getCid() is set_field.target
           if !@is_section_break
-            @$el.addClass('response-field-'+ @field_type)
+            @$el.addClass('response-field-'+ @field_type + ' '+ @model.getCid())
               .data('cid', cid)
               .html(Formbuilder.templates["view/base#{base_templ_suff}"]({
                 rf: @model,
                 opts: @options}))
+            @$el.addClass("hide") if set_field is true and action is 'show'
             do ( # compute and add names and values to fields
               x = null,
               count = 0,
@@ -147,9 +182,11 @@ class Formbuilder
               for x in @$("input, textarea, select")
                 count = do( # set element name, value and call setup
                   x,
-                  index = count + (if should_incr($(x).attr('type')) then 1 else 0),
+                  index = count + (if should_incr($(x)
+                          .attr('type')) then 1 else 0),
                   name = null,
                   val = null
+                  value = 0
                 ) =>
                   value = x.value if @model.get('field_type') == 'radio'
                   name = cid.toString() + "_" + index.toString()
@@ -160,7 +197,10 @@ class Formbuilder
                   $(x).attr("name", name)
                   @setFieldVal($(x), val) if val
                   @field.setup($(x), @model, index) if @field.setup
-                  if @model.get(Formbuilder.options.mappings.REQUIRED) && $.inArray(@model.get('field_type'), Formbuilder.options.FIELDSTYPES_CUSTOM_VALIDATION) == -1
+                  if @model.get(Formbuilder.options.mappings.REQUIRED) &&
+                  $.inArray(@model.get('field_type'),
+                  Formbuilder.options.FIELDSTYPES_CUSTOM_VALIDATION) == -1 &&
+                  set_field isnt true
                     $(x).attr("required", true)
                   index
         return @
