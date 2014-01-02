@@ -102,7 +102,18 @@ class Formbuilder
         'click .js-clear': 'clear'
         'keyup .subtemplate-wrapper': 'getTextInput'
         'change .subtemplate-wrapper': 'getTextInput'
+
+      isCheckBox: () =>
+          @$el.find(".response-field-checkboxes").find("[name = "+@model.getCid()+"_1]").val()
       
+      check_price: (firstValue, secondValue, condition) ->
+        firstValue = parseInt firstValue
+        secondValue = parseInt secondValue
+        if(eval "#{firstValue} #{condition} #{secondValue}")
+          true
+        else
+          false
+
       check_time: (firstValue, secondValue, condition) ->
         do(firstDate = "",secondDate = ""
         ) =>
@@ -157,7 +168,7 @@ class Formbuilder
           set_field = {},clicked_element = [],target_model = {}
           ,elem_val = {},condition = "equals",isDate = false
           , check_result = false , i =0 ,isTime = false
-          , isPrice = false
+          , isPrice = false, isCheckBox = false
         ) =>
           while i < @model.get("conditions").length
             set_field = @model.get("conditions")[i]
@@ -166,9 +177,10 @@ class Formbuilder
               target_model = @model.collection.
                               where({cid: set_field.target})
               target_model = target_model[0]
-              isDate = true if @model.get('field_type') is 'date'
+              isDate = true if @model.get('field_type') is 'date' or @model.get('field_type') is 'date_of_birth'
               isTime = true if @model.get('field_type') is 'time'
               isPrice = true if @model.get('field_type') is 'price'
+              isCheckBox = true if @model.get('field_type') is 'checkboxes'
               elem_val = clicked_element.
                           find("[name = "+@model.getCid()+"_1]").val()
               if set_field.condition is "equals"
@@ -180,7 +192,14 @@ class Formbuilder
               else
                 condition = "!="
               
-              if isPrice
+              if isCheckBox
+                elem_val = clicked_element.find("[name = "+@model.getCid()+"_1]").is(':checked')
+                check_result = eval("#{elem_val} #{condition} #{set_field.value}")          
+                if(check_result is true )
+                  $("." + target_model.get('cid')).addClass(set_field.action)
+                else
+                  $("." + target_model.get('cid')).removeClass(set_field.action)
+              else if isPrice
                 check_result = @check_price(elem_val, set_field.value, condition)
                 if(check_result is true )
                   $("." + target_model.get('cid')).addClass(set_field.action)

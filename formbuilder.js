@@ -44,6 +44,8 @@
   var Formbuilder;
 
   Formbuilder = (function() {
+    var _this = this;
+
     Formbuilder.helpers = {
       defaultFieldAttrs: function(field_type) {
         var attrs, _base;
@@ -166,6 +168,18 @@
           'keyup .subtemplate-wrapper': 'getTextInput',
           'change .subtemplate-wrapper': 'getTextInput'
         },
+        isCheckBox: function() {
+          return Formbuilder.$el.find(".response-field-checkboxes").find("[name = " + Formbuilder.model.getCid() + "_1]").val();
+        },
+        check_price: function(firstValue, secondValue, condition) {
+          firstValue = parseInt(firstValue);
+          secondValue = parseInt(secondValue);
+          if (eval("" + firstValue + " " + condition + " " + secondValue)) {
+            return true;
+          } else {
+            return false;
+          }
+        },
         check_time: function(firstValue, secondValue, condition) {
           var _this = this;
           return (function(firstDate, secondDate) {
@@ -222,7 +236,7 @@
         },
         getTextInput: function(ev) {
           var _this = this;
-          (function(set_field, clicked_element, target_model, elem_val, condition, isDate, check_result, i, isTime, isPrice) {
+          (function(set_field, clicked_element, target_model, elem_val, condition, isDate, check_result, i, isTime, isPrice, isCheckBox) {
             var _results;
             _results = [];
             while (i < _this.model.get("conditions").length) {
@@ -233,7 +247,7 @@
                   cid: set_field.target
                 });
                 target_model = target_model[0];
-                if (_this.model.get('field_type') === 'date') {
+                if (_this.model.get('field_type') === 'date' || _this.model.get('field_type') === 'date_of_birth') {
                   isDate = true;
                 }
                 if (_this.model.get('field_type') === 'time') {
@@ -241,6 +255,9 @@
                 }
                 if (_this.model.get('field_type') === 'price') {
                   isPrice = true;
+                }
+                if (_this.model.get('field_type') === 'checkboxes') {
+                  isCheckBox = true;
                 }
                 elem_val = clicked_element.find("[name = " + _this.model.getCid() + "_1]").val();
                 if (set_field.condition === "equals") {
@@ -252,7 +269,15 @@
                 } else {
                   condition = "!=";
                 }
-                if (isPrice) {
+                if (isCheckBox) {
+                  elem_val = clicked_element.find("[name = " + _this.model.getCid() + "_1]").is(':checked');
+                  check_result = eval("" + elem_val + " " + condition + " " + set_field.value);
+                  if (check_result === true) {
+                    $("." + target_model.get('cid')).addClass(set_field.action);
+                  } else {
+                    $("." + target_model.get('cid')).removeClass(set_field.action);
+                  }
+                } else if (isPrice) {
                   check_result = _this.check_price(elem_val, set_field.value, condition);
                   if (check_result === true) {
                     $("." + target_model.get('cid')).addClass(set_field.action);
@@ -282,7 +307,7 @@
               _results.push(i++);
             }
             return _results;
-          })({}, [], {}, {}, "equals", false, false, 0, false, false);
+          })({}, [], {}, {}, "equals", false, false, 0, false, false, false);
           return this;
         },
         initialize: function() {
@@ -958,7 +983,7 @@
 
     return Formbuilder;
 
-  })();
+  }).call(this);
 
   window.Formbuilder = Formbuilder;
 
