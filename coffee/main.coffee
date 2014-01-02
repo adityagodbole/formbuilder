@@ -103,6 +103,30 @@ class Formbuilder
         'keyup .subtemplate-wrapper': 'getTextInput'
         'change .subtemplate-wrapper': 'getTextInput'
       
+      check_time: (firstValue, secondValue, condition) ->
+        do(firstDate = "",secondDate = ""
+        ) =>
+          firstValue = firstValue.split(':')
+          secondValue = secondValue.split(':')
+          firstDate = new Date()
+          firstDate.setHours(firstValue[0])
+          firstDate.setMinutes(firstValue[1])
+          secondDate = new Date()
+          secondDate.setHours(secondValue[0])
+          secondDate.setMinutes(secondValue[1])
+          if (condition == "<")
+            if(firstDate < secondDate)
+              true
+            else
+              false
+          else if(condition == ">")
+            if(firstDate > secondDate)
+              true
+            else
+              false
+          else
+            false
+
       check_date: (firstValue, secondValue, condition) ->
         do(firstDate = "",secondDate = ""
         ) =>
@@ -132,16 +156,19 @@ class Formbuilder
         do(
           set_field = {},clicked_element = [],target_model = {}
           ,elem_val = {},condition = "equals",isDate = false
-          , check_result = false , i =0
+          , check_result = false , i =0 ,isTime = false
+          , isPrice = false
         ) =>
-          while i < _this.model.get("conditions").length
-            set_field = _this.model.get("conditions")[i]
+          while i < @model.get("conditions").length
+            set_field = @model.get("conditions")[i]
             if set_field.source is @model.getCid()
               clicked_element = $(ev.currentTarget)
               target_model = @model.collection.
                               where({cid: set_field.target})
               target_model = target_model[0]
               isDate = true if @model.get('field_type') is 'date'
+              isTime = true if @model.get('field_type') is 'time'
+              isPrice = true if @model.get('field_type') is 'price'
               elem_val = clicked_element.
                           find("[name = "+@model.getCid()+"_1]").val()
               if set_field.condition is "equals"
@@ -152,18 +179,29 @@ class Formbuilder
                 condition = '>'
               else
                 condition = "!="
-              if isDate
-                check_result = @check_date(elem_val, set_field.value, condition)
-                if(check_result)
-                  $("." + target_model.get('cid')).addClass('show')
+              
+              if isPrice
+                check_result = @check_price(elem_val, set_field.value, condition)
+                if(check_result is true )
+                  $("." + target_model.get('cid')).addClass(set_field.action)
                 else
-                  $("." + target_model.get('cid')).removeClass('show')
+                  $("." + target_model.get('cid')).removeClass(set_field.action)
+              else if isTime
+                check_result = @check_time(elem_val, set_field.value, condition)
+                if(check_result is true )
+                  $("." + target_model.get('cid')).addClass(set_field.action)
+                else
+                  $("." + target_model.get('cid')).removeClass(set_field.action)
+              else if isDate
+                check_result = @check_date(elem_val, set_field.value, condition)
+                if(check_result is true)
+                  $("." + target_model.get('cid')).addClass(set_field.action)
+                else
+                  $("." + target_model.get('cid')).removeClass(set_field.action)
               else if eval("'#{elem_val}' #{condition} '#{set_field.value}'")
-                $("."+target_model.
-                  get('cid')).addClass('show')
+                $("." + target_model.get('cid')).addClass(set_field.action)
               else
-                $("."+target_model.
-                  get('cid')).removeClass('show')
+                $("." + target_model.get('cid')).removeClass(set_field.action)
             i++
         return @
 
@@ -206,8 +244,7 @@ class Formbuilder
           if @model.get('conditions').length > 0
             set_field = @model.get('conditions')[0]
             action = set_field.action
-            set_field = true if @model.getCid() is set_field.target
-            @$el.addClass("hide") if set_field is true and action is 'show'
+            set_field = true if @model.getCid() is set_field.target 
           if !@is_section_break
             @$el.addClass('response-field-'+ @field_type + ' '+ @model.getCid())
               .data('cid', cid)
@@ -234,8 +271,10 @@ class Formbuilder
                     val = @model.get('field_values')[value]
                   else if @model.get('field_values')
                     val = @model.get('field_values')[name]
+                  console.log val  
                   $(x).attr("name", name)
                   @setFieldVal($(x), val) if val
+                  @$el.addClass("hide") if set_field is true and action is 'show' and val is null  
                   @field.setup($(x), @model, index) if @field.setup
                   if @model.get(Formbuilder.options.mappings.REQUIRED) &&
                   $.inArray(@model.get('field_type'),

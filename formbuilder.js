@@ -166,6 +166,34 @@
           'keyup .subtemplate-wrapper': 'getTextInput',
           'change .subtemplate-wrapper': 'getTextInput'
         },
+        check_time: function(firstValue, secondValue, condition) {
+          var _this = this;
+          return (function(firstDate, secondDate) {
+            firstValue = firstValue.split(':');
+            secondValue = secondValue.split(':');
+            firstDate = new Date();
+            firstDate.setHours(firstValue[0]);
+            firstDate.setMinutes(firstValue[1]);
+            secondDate = new Date();
+            secondDate.setHours(secondValue[0]);
+            secondDate.setMinutes(secondValue[1]);
+            if (condition === "<") {
+              if (firstDate < secondDate) {
+                return true;
+              } else {
+                return false;
+              }
+            } else if (condition === ">") {
+              if (firstDate > secondDate) {
+                return true;
+              } else {
+                return false;
+              }
+            } else {
+              return false;
+            }
+          })("", "");
+        },
         check_date: function(firstValue, secondValue, condition) {
           var _this = this;
           return (function(firstDate, secondDate) {
@@ -194,9 +222,8 @@
         },
         getTextInput: function(ev) {
           var _this = this;
-          (function(set_field, clicked_element, target_model, elem_val, condition, isDate, check_result) {
-            var i, _results;
-            i = 0;
+          (function(set_field, clicked_element, target_model, elem_val, condition, isDate, check_result, i, isTime, isPrice) {
+            var _results;
             _results = [];
             while (i < _this.model.get("conditions").length) {
               set_field = _this.model.get("conditions")[i];
@@ -209,6 +236,12 @@
                 if (_this.model.get('field_type') === 'date') {
                   isDate = true;
                 }
+                if (_this.model.get('field_type') === 'time') {
+                  isTime = true;
+                }
+                if (_this.model.get('field_type') === 'price') {
+                  isPrice = true;
+                }
                 elem_val = clicked_element.find("[name = " + _this.model.getCid() + "_1]").val();
                 if (set_field.condition === "equals") {
                   condition = '==';
@@ -219,23 +252,37 @@
                 } else {
                   condition = "!=";
                 }
-                if (isDate) {
-                  check_result = _this.check_date(elem_val, set_field.value, condition);
-                  if (check_result) {
-                    $("." + target_model.get('cid')).addClass('show');
+                if (isPrice) {
+                  check_result = _this.check_price(elem_val, set_field.value, condition);
+                  if (check_result === true) {
+                    $("." + target_model.get('cid')).addClass(set_field.action);
                   } else {
-                    $("." + target_model.get('cid')).removeClass('show');
+                    $("." + target_model.get('cid')).removeClass(set_field.action);
+                  }
+                } else if (isTime) {
+                  check_result = _this.check_time(elem_val, set_field.value, condition);
+                  if (check_result === true) {
+                    $("." + target_model.get('cid')).addClass(set_field.action);
+                  } else {
+                    $("." + target_model.get('cid')).removeClass(set_field.action);
+                  }
+                } else if (isDate) {
+                  check_result = _this.check_date(elem_val, set_field.value, condition);
+                  if (check_result === true) {
+                    $("." + target_model.get('cid')).addClass(set_field.action);
+                  } else {
+                    $("." + target_model.get('cid')).removeClass(set_field.action);
                   }
                 } else if (eval("'" + elem_val + "' " + condition + " '" + set_field.value + "'")) {
-                  $("." + target_model.get('cid')).addClass('show');
+                  $("." + target_model.get('cid')).addClass(set_field.action);
                 } else {
-                  $("." + target_model.get('cid')).removeClass('show');
+                  $("." + target_model.get('cid')).removeClass(set_field.action);
                 }
               }
               _results.push(i++);
             }
             return _results;
-          })({}, [], {}, {}, "equals", false, false);
+          })({}, [], {}, {}, "equals", false, false, 0, false, false);
           return this;
         },
         initialize: function() {
@@ -292,9 +339,6 @@
               if (_this.model.getCid() === set_field.target) {
                 set_field = true;
               }
-              if (set_field === true && action === 'show') {
-                _this.$el.addClass("hide");
-              }
             }
             if (!_this.is_section_break) {
               _this.$el.addClass('response-field-' + _this.field_type + ' ' + _this.model.getCid()).data('cid', cid).html(Formbuilder.templates["view/base" + base_templ_suff]({
@@ -317,9 +361,13 @@
                     } else if (_this.model.get('field_values')) {
                       val = _this.model.get('field_values')[name];
                     }
+                    console.log(val);
                     $(x).attr("name", name);
                     if (val) {
                       _this.setFieldVal($(x), val);
+                    }
+                    if (set_field === true && action === 'show' && val === null) {
+                      _this.$el.addClass("hide");
                     }
                     if (_this.field.setup) {
                       _this.field.setup($(x), _this.model, index);
