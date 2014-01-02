@@ -42,7 +42,7 @@ class Formbuilder
       HINT: 'field_options.hint',
       PREV_BUTTON_TEXT: 'field_options.prev_button_text',
       NEXT_BUTTON_TEXT: 'field_options.next_button_text'
-      INCLUDE_CONDITIONS: 'field_options.include_conditions'
+      MATCH_CONDITIONS: 'field_options.match_conditions'
 
     dict:
       ALL_CHANGES_SAVED: 'All changes saved'
@@ -327,7 +327,21 @@ class Formbuilder
           that.parentView.handleFormUpdate()
           index = that.parentView.fieldViews.indexOf(_.where(that.parentView.fieldViews, {cid: that.cid})[0])
           that.parentView.fieldViews.splice(index, 1) if (index > -1)
+          that.clearConditions that.model.getCid(), that.parentView.fieldViews
           that.model.destroy()
+
+      clearConditions: (cid, fieldViews) ->
+        _.each(fieldViews, (fieldView) ->
+          do(updated_conditions = {}) =>
+            unless _.isEmpty(fieldView.model.attributes.conditions)
+              updated_conditions = _.reject(fieldView.model.attributes.conditions, (condition) ->
+                return _.isEqual(condition.source, cid)
+              )
+              fieldView.model.attributes.conditions = []
+              fieldView.model.attributes.conditions = updated_conditions
+              #index = fieldView.attributes.conditions.indexOf(_.where(fieldView.attributes.conditions, {source: cid})[0]);
+              #fieldView.attributes.conditions.splice(index, 1) if (index > -1)
+        )
 
       duplicate: ->
         attrs = _.clone(@model.attributes)
@@ -388,7 +402,6 @@ class Formbuilder
 
         @model.set 'conditions', conditions
         @model.trigger 'change:conditions'
-        @forceRender()
 
       removeOption: (e) ->
         $el = $(e.currentTarget)
@@ -692,15 +705,26 @@ class Formbuilder
         @formSaved = true
         @saveFormButton.attr('disabled', true).text(Formbuilder.options.dict.ALL_CHANGES_SAVED)
         @collection.sort()
-        @collection.each @addConditions, @ unless @formConditionsSaved
+        @collection.each @removeSourceConditions, @
+        @collection.each @addConditions, @
 
         payload = JSON.stringify fields: @collection.toJSON()
 
         if Formbuilder.options.HTTP_ENDPOINT then @doAjaxSave(payload)
         @formBuilder.trigger 'save', payload
 
+      removeSourceConditions: (model) ->
+        unless _.isEmpty(model.attributes.conditions)
+          _.each(model.attributes.conditions, (condition) ->
+            do(index=0) =>
+              unless _.isEmpty(condition.source)
+                if condition.source == model.getCid()
+                  index = model.attributes.conditions.indexOf(condition);
+                  model.attributes.conditions.splice(index, 1) if (index > -1)
+                  model.save()
+          )
+
       addConditions: (model) ->
-        @formConditionsSaved = true
         unless _.isEmpty(model.attributes.conditions)
           _.each(model.attributes.conditions, (condition) ->
             do(source = {}) =>

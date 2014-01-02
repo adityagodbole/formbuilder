@@ -92,27 +92,49 @@ obj || (obj = {});
 var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
 function print() { __p += __j.call(arguments, '') }
 with (obj) {
-__p += '<div class=\'fb-edit-section-header\'>Conditions</div>\n\n\n<div class=\'subtemplate-wrapper row-fluid\' >\n  <div class=\'condition\' data-rv-each-condition=\'model.conditions\'>\n    <span class=\'fb-field-label fb-field-condition-label span1\'> If </span>\n    <div class="span8">\n      <select data-rv-value=\'condition:source\'>\n          <option value="">Select Field</option>\n        ';
- for( var i=0 ; i < opts.parentView.fieldViews.length ; i++){;
+__p += '<div class=\'fb-edit-section-header\'>Conditions</div>\n\n<select data-rv-value="model.' +
+((__t = ( Formbuilder.options.mappings.MATCH_CONDITIONS )) == null ? '' : __t) +
+'">\n  <option value="or">Select Matching</option>\n  <option value="and">Match All Conditions</option>\n  <option value="or">Match Any Conditions</option>\n</select>\n\n<div class=\'subtemplate-wrapper\' >\n  ';
+var c = -1;
+__p += '\n  <div class=\'condition\' data-rv-each-condition=\'model.conditions\'>\n    <div class=\'row-fluid\'>\n      ';
+ c += 1;
+__p += '\n      ';
+ var show_condition = true ;
+__p += '\n      ';
+ if (!_.isUndefined(rf.attributes.conditions[c])){ ;
+__p += '\n        ';
+ if (rf.getCid() == rf.attributes.conditions[c].source){ ;
 __p += '\n          ';
- if(opts.parentView.fieldViews[i].model.attributes.label == rf.attributes.label){ ;
-__p += '\n            ';
- break ;
-__p += '\n          ';
+ show_condition = false ;
+__p += '\n        ';
  } ;
-__p += '\n          <option value="' +
+__p += '\n      ';
+ } ;
+__p += '\n      ';
+if (show_condition) { ;
+__p += '\n        <span class=\'fb-field-label fb-field-condition-label span1\'> If </span>\n        <div class="span8">\n          <select data-rv-value=\'condition:source\'>\n              <option value="">Select Field</option>\n            ';
+ for( var i=0 ; i < opts.parentView.fieldViews.length ; i++){;
+__p += '\n              ';
+ if(opts.parentView.fieldViews[i].model.attributes.label == rf.attributes.label){ ;
+__p += '\n                ';
+ break ;
+__p += '\n              ';
+ } ;
+__p += '\n              <option value="' +
 ((__t = ( opts.parentView.fieldViews[i].model.getCid() )) == null ? '' : __t) +
 '">' +
 ((__t = ( opts.parentView.fieldViews[i].model.attributes.label )) == null ? '' : __t) +
-'</option>\n        ';
+'</option>\n            ';
 };
-__p += '\n      </select>\n    </div>\n    <span class=\'fb-field-label fb-field-condition-label span2\'> field </span>\n    <div class="span6">\n      <select data-rv-value=\'condition:condition\'>\n          <option value="">Select Comparator</option>\n          <option>equals</option>\n          <option>greater than</option>\n          <option>less than</option>\n          <option>is not empty</option>\n      </select>\n    </div>\n    <input class=\'span5 pull-right\' data-rv-input=\'condition:value\' type=\'text\'/>\n    <span class=\'fb-field-label fb-field-condition-label span2\'> then </span>\n    <div class="span3">\n      <select data-rv-value=\'condition:action\'>\n          <option value="">Select Action</option>\n          <option>show</option>\n          <option>hide</option>\n      </select>\n    </div>\n    <div class="span8">\n      <select data-rv-value=\'condition:target\'>\n        <option value="">Select Field</option>\n        <option value="' +
+__p += '\n          </select>\n        </div>\n        <span class=\'fb-field-label fb-field-condition-label span2\'> field </span>\n        <div class="span6">\n          <select data-rv-value=\'condition:condition\'>\n              <option value="">Select Comparator</option>\n              <option>equals</option>\n              <option>greater than</option>\n              <option>less than</option>\n              <option>is not empty</option>\n          </select>\n        </div>\n        <input class=\'span5 pull-right\' data-rv-input=\'condition:value\' type=\'text\'/>\n        <span class=\'fb-field-label fb-field-condition-label span2\'> then </span>\n        <div class="span3">\n          <select data-rv-value=\'condition:action\'>\n              <option value="">Select Action</option>\n              <option>show</option>\n              <option>hide</option>\n          </select>\n        </div>\n        <div class="span8">\n          <select data-rv-value=\'condition:target\'>\n            <option value="">Select Field</option>\n            <option value="' +
 ((__t = ( rf.getCid() )) == null ? '' : __t) +
 '" data-rv-text=\'model.' +
 ((__t = ( Formbuilder.options.mappings.LABEL )) == null ? '' : __t) +
-'\'></option>\n      </select>\n    </div>\n    <a class="pull-right js-remove-condition ' +
+'\'></option>\n          </select>\n        </div>\n        <a class="pull-right js-remove-condition ' +
 ((__t = ( Formbuilder.options.BUTTON_CLASS )) == null ? '' : __t) +
-'" title="Remove Condition"><i class=\'icon-minus-sign\'></i></a>\n  </div>\n</div>\n\n<div class=\'fb-bottom-add\'>\n  <a class="js-add-condition ' +
+'" title="Remove Condition"><i class=\'icon-minus-sign\'></i></a>\n      ';
+ } ;
+__p += '\n    </div>\n  </div>\n</div>\n\n<div class=\'fb-bottom-add\'>\n  <a class="js-add-condition ' +
 ((__t = ( Formbuilder.options.BUTTON_CLASS )) == null ? '' : __t) +
 '">Add Condition</a>\n</div>';
 

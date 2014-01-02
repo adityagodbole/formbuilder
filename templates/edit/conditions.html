@@ -1,46 +1,63 @@
 <div class='fb-edit-section-header'>Conditions</div>
 
+<select data-rv-value="model.<%= Formbuilder.options.mappings.MATCH_CONDITIONS %>">
+  <option value="or">Select Matching</option>
+  <option value="and">Match All Conditions</option>
+  <option value="or">Match Any Conditions</option>
+</select>
 
-<div class='subtemplate-wrapper row-fluid' >
+<div class='subtemplate-wrapper' >
+  <%var c = -1%>
   <div class='condition' data-rv-each-condition='model.conditions'>
-    <span class='fb-field-label fb-field-condition-label span1'> If </span>
-    <div class="span8">
-      <select data-rv-value='condition:source'>
-          <option value="">Select Field</option>
-        <% for( var i=0 ; i < opts.parentView.fieldViews.length ; i++){%>
-          <% if(opts.parentView.fieldViews[i].model.attributes.label == rf.attributes.label){ %>
-            <% break %>
-          <% } %>
-          <option value="<%= opts.parentView.fieldViews[i].model.getCid() %>"><%= opts.parentView.fieldViews[i].model.attributes.label %></option>
-        <%}%>
-      </select>
+    <div class='row-fluid'>
+      <% c += 1%>
+      <% var show_condition = true %>
+      <% if (!_.isUndefined(rf.attributes.conditions[c])){ %>
+        <% if (rf.getCid() == rf.attributes.conditions[c].source){ %>
+          <% show_condition = false %>
+        <% } %>
+      <% } %>
+      <%if (show_condition) { %>
+        <span class='fb-field-label fb-field-condition-label span1'> If </span>
+        <div class="span8">
+          <select data-rv-value='condition:source'>
+              <option value="">Select Field</option>
+            <% for( var i=0 ; i < opts.parentView.fieldViews.length ; i++){%>
+              <% if(opts.parentView.fieldViews[i].model.attributes.label == rf.attributes.label){ %>
+                <% break %>
+              <% } %>
+              <option value="<%= opts.parentView.fieldViews[i].model.getCid() %>"><%= opts.parentView.fieldViews[i].model.attributes.label %></option>
+            <%}%>
+          </select>
+        </div>
+        <span class='fb-field-label fb-field-condition-label span2'> field </span>
+        <div class="span6">
+          <select data-rv-value='condition:condition'>
+              <option value="">Select Comparator</option>
+              <option>equals</option>
+              <option>greater than</option>
+              <option>less than</option>
+              <option>is not empty</option>
+          </select>
+        </div>
+        <input class='span5 pull-right' data-rv-input='condition:value' type='text'/>
+        <span class='fb-field-label fb-field-condition-label span2'> then </span>
+        <div class="span3">
+          <select data-rv-value='condition:action'>
+              <option value="">Select Action</option>
+              <option>show</option>
+              <option>hide</option>
+          </select>
+        </div>
+        <div class="span8">
+          <select data-rv-value='condition:target'>
+            <option value="">Select Field</option>
+            <option value="<%= rf.getCid() %>" data-rv-text='model.<%= Formbuilder.options.mappings.LABEL %>'></option>
+          </select>
+        </div>
+        <a class="pull-right js-remove-condition <%= Formbuilder.options.BUTTON_CLASS %>" title="Remove Condition"><i class='icon-minus-sign'></i></a>
+      <% } %>
     </div>
-    <span class='fb-field-label fb-field-condition-label span2'> field </span>
-    <div class="span6">
-      <select data-rv-value='condition:condition'>
-          <option value="">Select Comparator</option>
-          <option>equals</option>
-          <option>greater than</option>
-          <option>less than</option>
-          <option>is not empty</option>
-      </select>
-    </div>
-    <input class='span5 pull-right' data-rv-input='condition:value' type='text'/>
-    <span class='fb-field-label fb-field-condition-label span2'> then </span>
-    <div class="span3">
-      <select data-rv-value='condition:action'>
-          <option value="">Select Action</option>
-          <option>show</option>
-          <option>hide</option>
-      </select>
-    </div>
-    <div class="span8">
-      <select data-rv-value='condition:target'>
-        <option value="">Select Field</option>
-        <option value="<%= rf.getCid() %>" data-rv-text='model.<%= Formbuilder.options.mappings.LABEL %>'></option>
-      </select>
-    </div>
-    <a class="pull-right js-remove-condition <%= Formbuilder.options.BUTTON_CLASS %>" title="Remove Condition"><i class='icon-minus-sign'></i></a>
   </div>
 </div>
 
