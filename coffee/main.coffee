@@ -105,37 +105,37 @@ class Formbuilder
       
       check_date: (firstValue, secondValue, condition) ->
         do(firstDate = "",secondDate = ""
-          , firstValue = "", secondValue = "") ->
-            if(firstValue != "")
-              firstValue = firstValue.split('/')
-              secondValue = secondValue.split('/')
-              firstDate = new Date()
-              firstDate.setFullYear(firstValue[0],
-               firstValue[1] - 1, firstValue[2])
-              secondDate = new Date()
-              secondDate.setFullYear(secondValue[0],
-                secondValue[1] - 1, secondValue[2])
-              if (condition == "<")
-                if(firstDate < secondDate)
-                  true
-                else
-                  false
-              else if(condition == ">")
-                if(firstDate > secondDate)
-                  true
-                else
-                  false
-              else
-                false
-        return @        
+        ) =>
+          firstValue = firstValue.split('/')
+          secondValue = secondValue.split('/')
+          firstDate = new Date()
+          firstDate.setFullYear(firstValue[0],
+           firstValue[1] - 1, firstValue[2])
+          secondDate = new Date()
+          secondDate.setFullYear(secondValue[0],
+            secondValue[1] - 1, secondValue[2])
+          if (condition == "<")
+            if(firstDate < secondDate)
+              true
+            else
+              false
+          else if(condition == ">")
+            if(firstDate > secondDate)
+              true
+            else
+              false
+          else
+            false
 
 
       getTextInput: (ev) ->
         do(
-          set_field = {},clicked_element = [],
-          target_model = {},elem_val = {},condition = "equals", 
-          isDate = true , check_result = false) ->
-            set_field = @model.get('conditions')[0]
+          set_field = {},clicked_element = [],target_model = {}
+          ,elem_val = {},condition = "equals",isDate = false
+          , check_result = false , i =0
+        ) =>
+          while i < _this.model.get("conditions").length
+            set_field = _this.model.get("conditions")[i]
             if set_field.source is @model.getCid()
               clicked_element = $(ev.currentTarget)
               target_model = @model.collection.
@@ -153,18 +153,19 @@ class Formbuilder
               else
                 condition = "!="
               if isDate
-                if(check_result =
-                  @check_date(elem_val, set_field.value, condition))
+                check_result = @check_date(elem_val, set_field.value, condition)
+                if(check_result)
                   $("." + target_model.get('cid')).addClass('show')
-                else 
+                else
                   $("." + target_model.get('cid')).removeClass('show')
-              else if  eval("'#{elem_val}' #{condition} '#{set_field.value}'")
+              else if eval("'#{elem_val}' #{condition} '#{set_field.value}'")
                 $("."+target_model.
                   get('cid')).addClass('show')
               else
                 $("."+target_model.
                   get('cid')).removeClass('show')
-        return @          
+            i++
+        return @
 
       initialize: ->
         @parentView = @options.parentView
@@ -266,7 +267,7 @@ class Formbuilder
       clear: ->
         do (index = 0, that = @) ->
           that.parentView.handleFormUpdate()
-          index = that.parentView.fieldViews.indexOf(_.where(that.parentView.fieldViews, {cid: that.cid})[0]);
+          index = that.parentView.fieldViews.indexOf(_.where(that.parentView.fieldViews, {cid: that.cid})[0])
           that.parentView.fieldViews.splice(index, 1) if (index > -1)
           that.model.destroy()
 
@@ -647,7 +648,7 @@ class Formbuilder
             do(source = {}) =>
               unless _.isEmpty(condition.source)
                 source = model.collection.where({cid: condition.source})
-                if source[0]
+                unless _.has(source[0].attributes.conditions, condition)
                   source[0].attributes.conditions.push(condition)
                   source[0].save()
           )

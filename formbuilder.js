@@ -167,68 +167,75 @@
           'change .subtemplate-wrapper': 'getTextInput'
         },
         check_date: function(firstValue, secondValue, condition) {
-          (function(firstDate, secondDate, firstValue, secondValue) {
-            if (firstValue !== "") {
-              firstValue = firstValue.split('/');
-              secondValue = secondValue.split('/');
-              firstDate = new Date();
-              firstDate.setFullYear(firstValue[0], firstValue[1] - 1, firstValue[2]);
-              secondDate = new Date();
-              secondDate.setFullYear(secondValue[0], secondValue[1] - 1, secondValue[2]);
-              if (condition === "<") {
-                if (firstDate < secondDate) {
-                  return true;
-                } else {
-                  return false;
-                }
-              } else if (condition === ">") {
-                if (firstDate > secondDate) {
-                  return true;
-                } else {
-                  return false;
-                }
+          var _this = this;
+          return (function(firstDate, secondDate) {
+            firstValue = firstValue.split('/');
+            secondValue = secondValue.split('/');
+            firstDate = new Date();
+            firstDate.setFullYear(firstValue[0], firstValue[1] - 1, firstValue[2]);
+            secondDate = new Date();
+            secondDate.setFullYear(secondValue[0], secondValue[1] - 1, secondValue[2]);
+            if (condition === "<") {
+              if (firstDate < secondDate) {
+                return true;
               } else {
                 return false;
               }
+            } else if (condition === ">") {
+              if (firstDate > secondDate) {
+                return true;
+              } else {
+                return false;
+              }
+            } else {
+              return false;
             }
-          })("", "", "", "");
-          return this;
+          })("", "");
         },
         getTextInput: function(ev) {
+          var _this = this;
           (function(set_field, clicked_element, target_model, elem_val, condition, isDate, check_result) {
-            set_field = this.model.get('conditions')[0];
-            if (set_field.source === this.model.getCid()) {
-              clicked_element = $(ev.currentTarget);
-              target_model = this.model.collection.where({
-                cid: set_field.target
-              });
-              target_model = target_model[0];
-              if (this.model.get('field_type') === 'date') {
-                isDate = true;
-              }
-              elem_val = clicked_element.find("[name = " + this.model.getCid() + "_1]").val();
-              if (set_field.condition === "equals") {
-                condition = '==';
-              } else if (set_field.condition === "less than") {
-                condition = '<';
-              } else if (set_field.condition === "greater than") {
-                condition = '>';
-              } else {
-                condition = "!=";
-              }
-              if (isDate) {
-                if ((check_result = this.check_date(elem_val, set_field.value, condition))) {
-                  return $("." + target_model.get('cid')).addClass('show');
-                } else {
-                  return $("." + target_model.get('cid')).removeClass('show');
+            var i, _results;
+            i = 0;
+            _results = [];
+            while (i < _this.model.get("conditions").length) {
+              set_field = _this.model.get("conditions")[i];
+              if (set_field.source === _this.model.getCid()) {
+                clicked_element = $(ev.currentTarget);
+                target_model = _this.model.collection.where({
+                  cid: set_field.target
+                });
+                target_model = target_model[0];
+                if (_this.model.get('field_type') === 'date') {
+                  isDate = true;
                 }
-              } else if (eval("'" + elem_val + "' " + condition + " '" + set_field.value + "'")) {
-                return $("." + target_model.get('cid')).addClass('show');
-              } else {
-                return $("." + target_model.get('cid')).removeClass('show');
+                elem_val = clicked_element.find("[name = " + _this.model.getCid() + "_1]").val();
+                if (set_field.condition === "equals") {
+                  condition = '==';
+                } else if (set_field.condition === "less than") {
+                  condition = '<';
+                } else if (set_field.condition === "greater than") {
+                  condition = '>';
+                } else {
+                  condition = "!=";
+                }
+                if (isDate) {
+                  check_result = _this.check_date(elem_val, set_field.value, condition);
+                  if (check_result) {
+                    $("." + target_model.get('cid')).addClass('show');
+                  } else {
+                    $("." + target_model.get('cid')).removeClass('show');
+                  }
+                } else if (eval("'" + elem_val + "' " + condition + " '" + set_field.value + "'")) {
+                  $("." + target_model.get('cid')).addClass('show');
+                } else {
+                  $("." + target_model.get('cid')).removeClass('show');
+                }
               }
+              _results.push(i++);
             }
-          })({}, [], {}, {}, "equals", true, false);
+            return _results;
+          })({}, [], {}, {}, "equals", false, false);
           return this;
         },
         initialize: function() {
@@ -821,7 +828,7 @@
                   source = model.collection.where({
                     cid: condition.source
                   });
-                  if (source[0]) {
+                  if (!_.has(source[0].attributes.conditions, condition)) {
                     source[0].attributes.conditions.push(condition);
                     return source[0].save();
                   }
