@@ -972,7 +972,19 @@
   Formbuilder.registerField('date', {
     view: "<div class='input-line'>\n  <input id='<%= rf.getCid() %>' type='text' readonly/>\n</div>\n<script>\n  $(function() {\n    $(\"#<%= rf.getCid() %>\").datepicker({ dateFormat: \"dd/mm/yy\" });\n  });\n</script>",
     edit: "",
-    addButton: "<span class=\"symbol\"><span class=\"icon-calendar\"></span></span> Date"
+    addButton: "<span class=\"symbol\"><span class=\"icon-calendar\"></span></span> Date",
+    isValid: function($el, model) {
+      var _this = this;
+      return (function(valid) {
+        valid = (function(required_attr) {
+          if (!required_attr) {
+            return true;
+          }
+          return $el.find(".hasDatepicker").val() !== '';
+        })(model.get('required'));
+        return valid;
+      })(false);
+    }
   });
 
 }).call(this);
@@ -1200,6 +1212,18 @@
       if (model.get(Formbuilder.options.mappings.STEP)) {
         return el.attr("step", model.get(Formbuilder.options.mappings.STEP));
       }
+    },
+    isValid: function($el, model) {
+      var _this = this;
+      return (function(valid) {
+        valid = (function(required_attr) {
+          if (!required_attr) {
+            return true;
+          }
+          return $el.find(".hasTimepicker").val() !== '';
+        })(model.get('required'));
+        return valid;
+      })(false);
     }
   });
 
