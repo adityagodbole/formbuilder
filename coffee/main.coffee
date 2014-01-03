@@ -103,6 +103,13 @@ class Formbuilder
         'keyup .subtemplate-wrapper': 'getTextInput'
         'change .subtemplate-wrapper': 'getTextInput'
 
+      show_hide_fields: (check_result, set_field, target_model)=>
+        do( set_field = set_field)=>
+          if(check_result is true )
+                $("." + target_model.get('cid')).addClass(set_field.action)
+          else
+                $("." + target_model.get('cid')).removeClass(set_field.action)
+
       isCheckBox: () =>
           @$el.find(".response-field-checkboxes").find("[name = "+@model.getCid()+"_1]").val()
       
@@ -177,10 +184,7 @@ class Formbuilder
               target_model = @model.collection.
                               where({cid: set_field.target})
               target_model = target_model[0]
-              isDate = true if @model.get('field_type') is 'date' or @model.get('field_type') is 'date_of_birth'
-              isTime = true if @model.get('field_type') is 'time'
-              isPrice = true if @model.get('field_type') is 'price'
-              isCheckBox = true if @model.get('field_type') is 'checkboxes'
+              field_type = @model.get('field_type')
               elem_val = clicked_element.
                           find("[name = "+@model.getCid()+"_1]").val()
               if set_field.condition is "equals"
@@ -192,31 +196,19 @@ class Formbuilder
               else
                 condition = "!="
               
-              if isCheckBox
-                elem_val = clicked_element.find("[name = "+@model.getCid()+"_1]").is(':checked')
-                check_result = eval("#{elem_val} #{condition} #{set_field.value}")          
-                if(check_result is true )
-                  $("." + target_model.get('cid')).addClass(set_field.action)
-                else
-                  $("." + target_model.get('cid')).removeClass(set_field.action)
-              else if isPrice
+              if field_type is 'checkboxes'
+                elem_val = clicked_element.find("[value = " + set_field.value+"]").is(':checked')
+                check_result = eval("'#{elem_val}' #{condition} 'true'")          
+                @show_hide_fields(check_result, set_field, target_model)
+              else if field_type is 'price'
                 check_result = @check_price(elem_val, set_field.value, condition)
-                if(check_result is true )
-                  $("." + target_model.get('cid')).addClass(set_field.action)
-                else
-                  $("." + target_model.get('cid')).removeClass(set_field.action)
-              else if isTime
+                @show_hide_fields(check_result, set_field, target_model)
+              else if field_type is 'time'
                 check_result = @check_time(elem_val, set_field.value, condition)
-                if(check_result is true )
-                  $("." + target_model.get('cid')).addClass(set_field.action)
-                else
-                  $("." + target_model.get('cid')).removeClass(set_field.action)
-              else if isDate
+                @show_hide_fields(check_result, set_field, target_model)
+              else if field_type is 'date' or field_type is 'date_of_birth'
                 check_result = @check_date(elem_val, set_field.value, condition)
-                if(check_result is true)
-                  $("." + target_model.get('cid')).addClass(set_field.action)
-                else
-                  $("." + target_model.get('cid')).removeClass(set_field.action)
+                @show_hide_fields(check_result, set_field, target_model)
               else if eval("'#{elem_val}' #{condition} '#{set_field.value}'")
                 $("." + target_model.get('cid')).addClass(set_field.action)
               else
