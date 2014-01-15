@@ -24,3 +24,15 @@ Formbuilder.registerField 'number',
       el.attr("max", model.get(Formbuilder.options.mappings.MAX))
     if model.get(Formbuilder.options.mappings.STEP)
       el.attr("step", model.get(Formbuilder.options.mappings.STEP))
+
+  clearFields: ($el, model) ->
+    $el.find("[name = " + model.getCid() + "_1]").val("")
+
+  evalResult: (clicked_element, cid, condition, set_value) ->
+    do( 
+      check_result=false
+    ) =>
+      elem_val = clicked_element
+                          .find("[name = "+cid+"_1]").val()
+      check_result = eval("'#{elem_val}' #{condition} '#{set_field}'")
+      check_result      

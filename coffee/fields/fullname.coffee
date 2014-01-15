@@ -29,7 +29,7 @@ Formbuilder.registerField 'fullname',
       </span>
 
       <span>
-        <input type='text'/>
+        <input id='suffix' type='text'/>
         <label>Suffix</label>
       </span>
     </div>
@@ -50,3 +50,18 @@ Formbuilder.registerField 'fullname',
         return ($el.find("#first_name").val() != '' &&
           $el.find("#last_name").val() != '')
       valid
+
+  clearFields: ($el, model) ->
+    $el.find("#first_name").val("")
+    $el.find("#last_name").val("")
+    $el.find("#suffix").val("")
+
+  evalResult: (clicked_element, cid, condition, set_value) ->
+    do(
+       elem_val = '' ,
+       check_result = false                   
+    ) =>           
+    elem_val = clicked_element
+                          .find("#first_name").val()           
+    check_result = eval("'#{elem_val}' #{condition} '#{set_value}'")  
+    check_result
