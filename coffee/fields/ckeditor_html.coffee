@@ -1,3 +1,4 @@
+#CKEDITOR: http://ckeditor.com/
 unless typeof(CKEDITOR) is 'undefined'
   Formbuilder.registerField 'free_text_html',
 
