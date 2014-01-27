@@ -195,9 +195,11 @@
             } else {
               _this.$el.removeClass(set_field.action);
               if (set_field.action === 'hide') {
+                _this.$el.addClass("show");
                 _this.current_state = set_field.action;
                 return _this.add_remove_require(true);
               } else {
+                _this.$el.addClass("hide");
                 _this.add_remove_require(false);
                 return _this.current_state = "hide";
               }
@@ -325,25 +327,8 @@
         },
         live_render: function() {
           var _this = this;
-          (function(set_field, i, action, cid, set_field_class, base_templ_suff) {
+          (function(set_field, i, action, cid, base_templ_suff) {
             var _fn, _i, _len, _ref;
-            if (_this.model.attributes.conditions) {
-              if (_this.model.get('conditions').length > 0) {
-                while (i < _this.model.get('conditions').length) {
-                  set_field = _this.model.get('conditions')[i];
-                  if (set_field.action === 'show' && _this.model.getCid() === set_field.target) {
-                    set_field_class = true;
-                  }
-                  break;
-                }
-                i++;
-              }
-            }
-            if (set_field_class === true) {
-              _this.current_state = "hide";
-            } else {
-              _this.current_state = "show";
-            }
             if (_this.model.attributes.conditions) {
               if (!_this.is_section_break) {
                 if (_this.model.get("conditions").length) {
@@ -386,34 +371,12 @@
                 for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
                   x = _ref1[_j];
                   _results.push(count = (function(x, index, name, val, value, elem_value) {
-                    if (_this.field_type === 'radio') {
-                      value = x.value;
-                    }
                     name = cid.toString() + "_" + index.toString();
-                    if ($(x).attr('type') === 'radio' && _this.model.get('field_values')) {
-                      val = _this.model.get('field_values')[value];
-                    } else if (_this.model.get('field_values')) {
-                      val = _this.model.get('field_values')[name];
-                    }
                     $(x).attr("name", name);
-                    if (val) {
-                      _this.setFieldVal($(x), val);
-                    }
-                    if (_this.field_type === "fullname") {
-                      elem_value = _this.$el.find("[name = " + _this.model.getCid() + "_2]").val();
-                    } else {
-                      elem_value = _this.$el.find("[name = " + _this.model.getCid() + "_1]").val();
-                    }
-                    if (set_field_class === false && _this.model.get('field_values') && elem_value === "") {
-                      _this.$el.addClass("hide");
-                    }
-                    if (set_field_class === true && (val === null || elem_value === "" || _this.$el.find("[name = " + _this.model.getCid() + "_1]").val() === false)) {
-                      _this.$el.addClass("hide");
-                    }
                     if (_this.field.setup) {
                       _this.field.setup($(x), _this.model, index);
                     }
-                    if (_this.model.get(Formbuilder.options.mappings.REQUIRED) && $.inArray(_this.field_type, Formbuilder.options.FIELDSTYPES_CUSTOM_VALIDATION) === -1 && set_field_class !== true) {
+                    if (_this.model.get(Formbuilder.options.mappings.REQUIRED) && $.inArray(_this.field_type, Formbuilder.options.FIELDSTYPES_CUSTOM_VALIDATION) === -1) {
                       $(x).attr("required", true);
                     }
                     return index;
@@ -424,37 +387,8 @@
                 return attr !== 'radio';
               });
             }
-          })({}, 0, "show", this.model.getCid(), false, this.model.is_input() ? '' : '_non_input');
+          })({}, 0, "show", this.model.getCid(), this.model.is_input() ? '' : '_non_input');
           return this;
-        },
-        setFieldVal: function(elem, val) {
-          var _this = this;
-          return (function(setters, type) {
-            setters = {
-              file: function() {
-                $(elem).siblings(".active_link").attr("href", val);
-                if (val) {
-                  return $(elem).siblings(".active_link").text(val.split("/").pop().split("?")[0]);
-                }
-              },
-              checkbox: function() {
-                if (val) {
-                  return $(elem).attr("checked", true);
-                }
-              },
-              radio: function() {
-                if (val) {
-                  return $(elem).attr("checked", true);
-                }
-              },
-              "default": function() {
-                if (val) {
-                  return $(elem).val(val);
-                }
-              }
-            };
-            return (setters[type] || setters['default'])(elem, val);
-          })(null, $(elem).attr('type'));
         },
         focusEditView: function() {
           if (!this.options.live) {
@@ -846,10 +780,83 @@
           })(null, 1, this.fieldViews, false, null, 1, 'Back', 'Next', this.options.showSubmit);
           return this;
         },
+        triggerEvent: function() {
+          var _this = this;
+          return (function(field_view, fieldViews, model) {
+            var _fn, _i, _j, _len, _len1, _results;
+            _fn = function(x, count, should_incr) {
+              var _j, _len1, _ref, _results;
+              _ref = field_view.$("input, textarea, select");
+              _results = [];
+              for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+                x = _ref[_j];
+                _results.push(count = (function(x, index, name, val, value, model, cid) {
+                  cid = model.getCid();
+                  if (field_view.field_type === 'radio') {
+                    value = x.value;
+                  }
+                  name = cid.toString() + "_" + index.toString();
+                  if ($(x).attr('type') === 'radio' && model.get('field_values')) {
+                    val = model.get('field_values')[value];
+                  } else if (model.get('field_values')) {
+                    val = model.get('field_values')[name];
+                    if (val) {
+                      _this.setFieldVal($(x), val);
+                    }
+                  }
+                  return index;
+                })(x, count + (should_incr($(x).attr('type')) ? 1 : 0), null, null, 0, field_view.model, ''));
+              }
+              return _results;
+            };
+            for (_i = 0, _len = fieldViews.length; _i < _len; _i++) {
+              field_view = fieldViews[_i];
+              _fn(null, 0, function(attr) {
+                return attr !== 'radio';
+              });
+            }
+            _results = [];
+            for (_j = 0, _len1 = fieldViews.length; _j < _len1; _j++) {
+              field_view = fieldViews[_j];
+              _results.push(field_view.trigger('change_state'));
+            }
+            return _results;
+          })(null, this.fieldViews, "");
+        },
+        setFieldVal: function(elem, val) {
+          var _this = this;
+          return (function(setters, type) {
+            setters = {
+              file: function() {
+                $(elem).siblings(".active_link").attr("href", val);
+                if (val) {
+                  return $(elem).siblings(".active_link").text(val.split("/").pop().split("?")[0]);
+                }
+              },
+              checkbox: function() {
+                if (val) {
+                  return $(elem).attr("checked", true);
+                }
+              },
+              radio: function() {
+                if (val) {
+                  return $(elem).attr("checked", true);
+                }
+              },
+              "default": function() {
+                if (val) {
+                  return $(elem).val(val);
+                }
+              }
+            };
+            return (setters[type] || setters['default'])(elem, val);
+          })(null, $(elem).attr('type'));
+        },
         addAll: function() {
           this.collection.each(this.addOne, this);
           if (this.options.live) {
             this.applyEasyWizard();
+            this.triggerEvent();
             return $('.readonly').find('input, textarea, select').attr('disabled', true);
           } else {
             return this.setSortable();
