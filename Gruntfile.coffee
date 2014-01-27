@@ -44,6 +44,8 @@ module.exports = (grunt) ->
 
     stylus:
       all:
+        options:
+          compress: false
         files:
           'formbuilder.css': 'styl/formbuilder.styl'
 

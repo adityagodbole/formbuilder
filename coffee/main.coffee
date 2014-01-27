@@ -215,35 +215,16 @@ class Formbuilder
         @trigger('change_state')
 
       openGMap: ->
-        if $('#myModal').length is 0
-          $('<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                  <h4 class="modal-title" id="myModalLabel">Google Maps</h4>
-                </div>
-                <div class="modal-body" style="height:560px;">
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-default" id="ok" data-dismiss="modal">Ok</button>
-                </div>
-              </div>
-            </div>
-            </div>
-            ').appendTo('.formbuilder-panel')
-          $('#myModal').modal({
-            show: true,
-            remote: "gmap/show"
-          }) 
-
+        if $('#myModal1').length is 0
+          @field.addRequiredConditions() if @field.addRequiredConditions
         $('#ok').val(this.model.getCid()) 
-        $('#myModal').modal({
+        $('#myModal1').modal({
           show: true
         })
 
-        $("#myModal").on "shown", (e) ->
-            $( "#gmap_address" ).keypress (event) ->
+        $("#myModal1").on "shown", (e) ->
+            initialize();
+            $( "#gmap_address" ).keypress (event) -> 
               if(event.keyCode == 13)
                 codeAddress();
 
@@ -258,8 +239,8 @@ class Formbuilder
         $('#ok').on 'click', (e) ->
             $("[name = " + getCid() + "_1]").val(getLatLong());  
 
-        $('#myModal').on 'hidden.bs.modal', (e) ->
-          $('#myModal').off('shown').on('shown')
+        $('#myModal1').on 'hidden.bs.modal', (e) ->
+          $('#myModal1').off('shown').on('shown')
           $(this).removeData "modal"
        
       isValid: ->
